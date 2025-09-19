@@ -1,19 +1,34 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
-const InvitadoRutas = require('./vista/InvitadoRutas');
-const PORT = process.env.PORT;
+const Rutas = require('./vista/SuperPorteroRutas');
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+class Servidor {
+  constructor() {
+    this.app = express();
+    this.port = process.env.PORT || 3000;
+    this.rutas = new Rutas();
 
-app.use('/invitado', InvitadoRutas);
+    this.middlewares();
+    this.routes();
+  }
 
-app.get('/', (req, res) => {
-    res.send('Funcionando');
-});
+  middlewares() {
+    this.app.use(cors());            // Habilita CORS
+    this.app.use(express.json());    // Para interpretar JSON en las peticiones
+    this.app.use(express.urlencoded({extended:true}));
+  }
 
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
+  routes() {
+    this.app.use('/api', this.rutas.getRouter());
+  }
+
+  iniciar() {
+    this.app.listen(this.port, () => {
+      console.log(`Servidor corriendo en http://localhost:${this.port}`);
+    });
+  }
+
+}
+
+const servidor = new Servidor();
+servidor.iniciar();
